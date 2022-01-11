@@ -1,25 +1,56 @@
-import logo from './logo.svg';
-import './App.css';
+import React, { Component } from "react";
+import "./App.css";
+import ReactDOM from "react-dom";
+import { connect } from "react-redux";
+import { BrowserRouter, Route, Switch } from "react-router-dom";
+import { routeHome } from "./router";
 
-function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
+import BackToTop from "./components/BackToTop";
+
+import HomeTemplate from "./container/HomeTemplate";
+import PageNotFound from "./container/PageNotFound";
+
+import { createAction } from "./container/HomeTemplate/AccUser/Login/modules/actionforLogin";
+import { USER_LOGIN_SUCCESS } from "./container/HomeTemplate/AccUser/Login/modules/constant";
+import Login from "./container/HomeTemplate/AccUser/Login";
+
+class App extends Component {
+  render() {
+    const showLayoutHome = (route) => {
+      if (route && route.length > 0) {
+        return route.map((item, index) => {
+          return (
+            <HomeTemplate
+              key={index}
+              exact={item.exact}
+              path={item.path}
+              Component={item.component}
+            />
+          );
+        });
+      }
+    };
+    return (
+      <BrowserRouter>
+        <Switch>
+          {showLayoutHome(routeHome)}
+          <Route path="/" component={Login} />
+          <Route path="" component={PageNotFound} />
+        </Switch>
+        <BackToTop key={2} />
+      </BrowserRouter>
+    );
+  }
+  _getLoginInLocal = () => {
+    const user = localStorage.getItem("userKH");
+    if (user) {
+      this.props.dispatch(createAction(USER_LOGIN_SUCCESS, JSON.parse(user)));
+    }
+  };
+
+  componentDidMount() {
+    this._getLoginInLocal();
+  }
 }
 
-export default App;
+export default connect()(App);
